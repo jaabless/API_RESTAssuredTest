@@ -16,7 +16,7 @@ public class PostTests extends BaseTest {
     // Verifies user creation with various inputs (positive, negative, and edge cases).
     @ParameterizedTest
     @ArgumentsSource(UserTestDataProvider.class)
-    @Story("Create User")
+    @Story("CREATE User")
     @DisplayName("Should handle user creation with various inputs")
     void testCreateUser(User user, int expectedStatus) {
         given()

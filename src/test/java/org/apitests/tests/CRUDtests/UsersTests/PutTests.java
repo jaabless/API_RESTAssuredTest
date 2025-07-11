@@ -14,7 +14,7 @@ public class PutTests extends BaseTest {
     // UPDATE (PUT) Tests
     @ParameterizedTest
     @MethodSource("org.apitests.data.UserTestDataProvider#provideUpdateUserData")
-    @Story("Update(PUT) User")
+    @Story("UPDATE(PUT) User")
     @DisplayName("Should handle user update with various inputs")
     void testUpdateUser(User user, int expectedStatus) {
         given()
@@ -24,8 +24,7 @@ public class PutTests extends BaseTest {
                 .when()
                 .put("/users/{id}")
                 .then()
-                .spec(responseSpec)
-                .statusCode(anyOf(is(expectedStatus), is(200))) // JSONPlaceholder may create new resource
+                .statusCode(expectedStatus) // JSONPlaceholder may create new resource
                 .body("name", user.getName() != null ? equalTo(user.getName()) : any(String.class))
                 .body("username", user.getUsername() != null ? equalTo(user.getUsername()) : any(String.class))
                 .body("email", user.getEmail() != null ? equalTo(user.getEmail()) : any(String.class));

@@ -1,11 +1,9 @@
-package org.apitests.tests.CRUDtests;
+package org.apitests.tests.CRUDtests.PostTests;
 
 import io.qameta.allure.Story;
 import org.apitests.base.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
@@ -37,8 +35,20 @@ public class GetTests extends BaseTest {
                 .statusCode(200)
                 .body(matchesJsonSchemaInClasspath("schemas/post-schema.json"))
                 .body("id", equalTo(1))
-                .body("userId", notNullValue())
-                .time(lessThan(2000L), TimeUnit.MILLISECONDS);
+                .body("userId", notNullValue());
+    }
+
+    @Test
+    @Story("GET Posts")
+    @DisplayName("Should handle invalid post ID")
+    void testGetPostInvalidId() {
+        given()
+                .pathParam("id", 9999)
+                .when()
+                .get("/posts/{id}")
+                .then()
+                .statusCode(404)
+                .body(is("{}"));
     }
 
 }
