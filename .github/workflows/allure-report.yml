@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build and Run Tests
-        run: mvn clean
+        run: mvn clean test
 
       - name: Generate Allure
         if: always()
