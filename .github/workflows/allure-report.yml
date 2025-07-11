@@ -37,7 +37,7 @@ jobs:
           mkdir -p docs
           cp -r target/site/allure-maven-plugin/* docs/
 
-      - name: 🔐 Configure Git and Push Allure Report
+      - name: Configure Git and Push Allure Report
         if: always()
         run: |
           git config user.name "github-actions"
