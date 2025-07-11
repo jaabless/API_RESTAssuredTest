@@ -50,7 +50,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GH_PAT }}
-          publish_dir: allure-report
+          publish_dir: target/allure-report
           publish_branch: gh-pages
   notify-slack:
     needs: [ test, deploy-allure-report ]
