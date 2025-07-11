@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -26,7 +26,7 @@ jobs:
           name: allure-results
           path: target/allure-results
   deploy-allure-report:
-    needs: test
+    needs: build-and-test
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -52,19 +52,24 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: target/allure-report
           publish_branch: gh-pages
-  notify-slack:
-    needs: [ test, deploy-allure-report ]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Send Slack notification
+      - name: Set custom message
+        id: set-message
         run: |
-          STATUS="${{ needs.test.result }}"
-          if [ "$STATUS" = "success" ]; then
-            EMOJI=":white_check_mark:"
+          if [ "${{ steps.run-tests.outcome }}" == "success" ]; then
+            echo "message=✅ All tests passed successfully for $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
           else
-            EMOJI=":x:"
+            echo "message=❌ Some tests failed in $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
           fi
-          curl -X POST -H 'Content-type: application/json' --data "{
-            \"text\": \"${EMOJI} CI/CD finished with status: *$STATUS*\nRepo: $GITHUB_REPOSITORY\nCommit: <https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA%7C$GITHUB_SHA>\"
-          }" ${{ secrets.NEWSLETTER_CHANNEL }}
+  notify:
+    needs: [ build-and-test, deploy-allure-report ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.build-and-test.result }}
+          text: ${{ needs.build-and-test.outputs.message }}
+          fields: repo,message,commit,author,action,eventName,ref
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NEWSLETTER_CHANNEL }}
