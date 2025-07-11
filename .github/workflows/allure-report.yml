@@ -1,75 +1,70 @@
-name: API Tests with REST Assured and Allure Report
-
+name: Run API Tests with Allure
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
-
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-
+    continue-on-error: true
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up JDK 21
+      - name: Set up JDK 21 and Maven
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
           distribution: 'temurin'
-
-      - name: Build and Run Tests
+          java-version: '21'
+          cache: 'maven'
+      - name: Run tests and generate Allure results
         run: mvn clean test
-
-      - name: Generate Allure
+      - name: Upload Allure results as artifact
         if: always()
-        run: mvn allure:report
-
-      - name: Prepare Allure Report for GitHub Pages
-        if: always()
-        run: |
-          rm -rf docs
-          mkdir -p docs
-          cp -r target/site/allure-maven-plugin/* docs/
-
-      - name: 🔐 Configure Git and Push Allure Report
-        if: always()
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git remote set-url origin https://x-access-token:$GH_PAT@github.com/jaabless/API_RESTAssuredTest.git
-          git add docs/
-          git commit -m "Update Allure Report [CI]" || echo "No changes"
-          git push origin main
-
-
-
-      - name: Set custom message
-        if: always()
-        id: set-message
-        run: |
-          if [ "${{ steps.run-tests.outcome }}" == "success" ]; then
-            echo "message=✅ All tests passed successfully for $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
-          else
-            echo "message=❌ Some tests failed in $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
-          fi
-
-  notify:
-    needs: build-and-test
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Slack Notification
-        uses: 8398a7/action-slack@v3
+        uses: actions/upload-artifact@v4
         with:
-          status: ${{ needs.build-and-test.result }}
-          text: ${{ needs.build-and-test.outputs.message }}
-          fields: repo,message,commit,author,action,eventName,ref
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.NEWSLETTER_CHANNEL }}
+          name: allure-results
+          path: allure-results
+  deploy-allure-report:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+      - name: Install Allure CLI
+        run: |
+          wget https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          tar -xzf allure-2.27.0.tgz
+          sudo mv allure-2.27.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+      - name: Generate Allure report
+        run: |
+          allure generate allure-results --clean -o allure-report
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          publish_branch: gh-pages
+  notify-slack:
+    needs: [ test, deploy-allure-report ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send Slack notification
+        run: |
+          STATUS="${{ needs.test.result }}"
+          if [ "$STATUS" = "success" ]; then
+            EMOJI=":white_check_mark:"
+          else
+            EMOJI=":x:"
+          fi
+          curl -X POST -H 'Content-type: application/json' --data "{
+            \"text\": \"${EMOJI} CI/CD finished with status: *$STATUS*\nRepo: $GITHUB_REPOSITORY\nCommit: <https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA%7C$GITHUB_SHA>\"
+          }" ${{ secrets.NEWSLETTER_CHANNEL }}
