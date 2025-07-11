@@ -36,15 +36,18 @@ jobs:
           mkdir -p docs
           cp -r target/site/allure-maven-plugin/* docs/
 
-      - name: Configure Git and Push Allure Report
+      - name: 🔐 Configure Git and Push Allure Report
         if: always()
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/jaabless/API_RESTAssuredTest.git
+          git remote set-url origin https://x-access-token:$GH_PAT@github.com/jaabless/API_RESTAssuredTest.git
           git add docs/
-          git commit -m "Update Allure Report [CI]" || echo "Nothing to commit"
-          git push
+          git commit -m "Update Allure Report [CI]" || echo "No changes"
+          git push origin main
+
 
 
       - name: Set custom message
