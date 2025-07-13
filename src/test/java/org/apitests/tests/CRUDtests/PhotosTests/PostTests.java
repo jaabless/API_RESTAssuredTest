@@ -14,10 +14,11 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.*;
+
 public class PostTests extends BaseTest {
 
     @ParameterizedTest
-//    @ArgumentsSource(org.apitests.data.AdditionalResourcesTestDataProvider.class)
+//    @ArgumentsSource
     @MethodSource("org.apitests.data.AdditionalResourcesTestDataProvider#providePhotoData")
     @Story("CREATE Photo")
     @DisplayName("Should handle photo creation with various inputs")
