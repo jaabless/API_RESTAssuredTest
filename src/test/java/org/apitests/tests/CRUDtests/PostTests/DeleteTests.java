@@ -1,10 +1,11 @@
 package org.apitests.tests.CRUDtests.PostTests;
+
 import io.qameta.allure.Story;
 import org.apitests.base.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import static io.restassured.RestAssured.given;
+
 public class DeleteTests extends BaseTest {
 
     @Test
