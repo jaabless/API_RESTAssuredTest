@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.*;
 public class PostTests extends BaseTest {
 
     @ParameterizedTest
-    @MethodSource("org.apitests.data.PostTestDataProvider#invalidPostData")
+    @MethodSource("org.apitests.data.PostTestDataProvider#validPostData")
     @Story("CREATE Posts")
     @DisplayName("Create post with valid data")
     void testCreatePost(String title, String body, int userId) {
