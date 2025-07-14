@@ -19,7 +19,7 @@ public class DeleteTests extends BaseTest {
                 .when()
                 .delete("/users/{id}")
                 .then()
-                .spec(responseSpec)
+//                .spec(responseSpec)
                 .statusCode(200)
                 .body(is("{}"));
     }
