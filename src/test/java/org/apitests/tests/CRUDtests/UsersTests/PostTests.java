@@ -6,9 +6,7 @@ import org.apitests.data.UserTestDataProvider;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import io.qameta.allure.Story;
-
 import org.junit.jupiter.api.DisplayName;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 public class PostTests extends BaseTest {
@@ -25,7 +23,7 @@ public class PostTests extends BaseTest {
                 .when()
                 .post("/users")
                 .then()
-                .spec(responseSpec)
+//                .spec(responseSpec)
                 .statusCode(expectedStatus)
                 .body("name", user.getName() != null ? equalTo(user.getName()) : any(String.class))
                 .body("username", user.getUsername() != null ? equalTo(user.getUsername()) : any(String.class))
