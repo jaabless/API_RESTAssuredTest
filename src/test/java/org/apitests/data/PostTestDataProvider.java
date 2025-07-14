@@ -5,7 +5,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import java.util.stream.Stream;
 
 public class PostTestDataProvider {
-    public static Stream<Arguments> postData() {
+    public static Stream<Arguments> validPostData() {
         return Stream.of(
                 Arguments.of("foo", "bar", 1)
         );
