@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.*;
 public class PerformanceTests  extends BaseTest {
 
     @Test
-    @Story("Response Time")
+    @Story("PERFORMANCE")
     @DisplayName("Should verify response time for multiple requests Under 2 Seconds")
     void testResponseTime() {
         // This test checks if the response time for the /posts endpoint is under 2 seconds
